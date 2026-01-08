@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Perfil de inversionista · Perfilamiento 2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --provi-bg:#11321b;         /* fondo */
+    --provi-primary:#105028;    /* verde Provi */
+    --card-radius:12px;
+    --card-width: 85%;
+    --max-question-width:900px;
+    --input-radius:16px;
+    --mobile-card-pad:20px;
+  }
+  html { -webkit-text-size-adjust: 100%; }
+  * { box-sizing: border-box; }
+  body{
+    margin:0;
+    font-family:'Open Sans',Arial,Helvetica,sans-serif;
+    background:var(--provi-bg); color:#11321b;
+    display:flex; flex-direction:column; align-items:center;
+    position: relative; overflow-x:hidden;
+    padding-left:max(12px, env(safe-area-inset-left));
+    padding-right:max(12px, env(safe-area-inset-right));
+  }
+  img { max-width:100%; height:auto; display:block; }
+
+  h1{
+    font-family:'Montserrat', Arial, Helvetica, sans-serif;
+    color:#fff; text-align:center; margin:24px 0; font-weight:700;
+  }
+  .card{
+    width:var(--card-width); max-width:var(--max-question-width);
+    background:#fff; border-radius:var(--card-radius);
+    padding:40px 48px; box-sizing:border-box;
+  }
+  label{display:block;margin:18px 0 6px;font-weight:600;}
+  select,input[type="text"],input[type="email"]{
+    width:100%; padding:12px 14px; border:2px solid #ccc; border-radius:var(--input-radius);
+    font-size:1rem; box-sizing:border-box; min-height:42px;
+  }
+  textarea{
+    width:100%; min-height:90px; padding:12px 14px; border-radius:var(--input-radius);
+    border:2px solid #ccc; resize:vertical; box-sizing:border-box;
+  }
+
+  /* Botones más pequeños e inline */
+  .actions{ margin-top:6px; }
+  .btn{
+    background:#6e6e6e; color:#fff; border:none;
+    padding:10px 18px; font-size:.95rem;
+    border-radius:24px; cursor:pointer; margin-top:18px;
+    min-height:38px; line-height:1.2; display:inline-block;
+  }
+  .btn-back{background:#bbb; margin-right:12px;}
+  .btn[disabled]{opacity:.5;cursor:not-allowed;}
+
+  .hidden{display:none;}
+  .typing{min-height:110px;white-space:pre-wrap;}
+  .terms-wrapper{display:flex;gap:12px;align-items:flex-start;margin-bottom:20px;}
+  .terms-wrapper input{margin-top:4px;}
+  fieldset{margin:10px 0 0 0;border:1px dashed #e5e7eb;border-radius:10px;padding:12px 14px}
+  legend{font-weight:700;padding:0 6px}
+
+  .question-block{margin-top:18px;padding-top:14px;border-top:1px solid #E5E7EB;}
+  .fieldset-clean{
+    margin-top:18px;border:1px solid #E5E7EB;background:#F9FAFB;
+    border-radius:10px;padding:10px 12px;
+  }
+  .fieldset-clean legend{font-weight:700;padding:0 6px;margin-left:4px;}
+  .fieldset-clean label{
+    display:flex;align-items:flex-start;gap:10px;margin:10px 0 0;font-weight:600;
+  }
+  .fieldset-clean input[type="checkbox"]{width:18px;height:18px;margin-top:2px;flex-shrink:0;}
+  label + select{ margin-bottom: 8px; }
+
+  /* Resultado */
+  #pantalla-10 {
+    background: var(--provi-bg) !important; color: #fff !important;
+    border-radius: 18px; border: 3px solid #fff;
+    padding: 56px 48px 44px 48px !important; min-height: 440px;
+    max-width: 900px; margin: auto; box-sizing: border-box;
+    box-shadow: 0 6px 36px #0003; text-align: justify; text-justify: inter-word;
+  }
+  #pantalla-10 p {color:#fff !important;font-size:1.15em;line-height:1.65;margin:0 0 1em}
+  #pantalla-10 .perfil-titulo {font-size:1.8em;font-weight:700;margin:0 0 .8em}
+
+  /* Responsive */
+  @media(max-width:768px){
+    h1 { font-size:1.4rem; line-height:1.25; margin:18px 0; padding-right:72px; }
+    .card { width:100%; max-width:100%; padding:var(--mobile-card-pad); margin:10px auto; border-radius:12px; }
+    label { margin:14px 0 6px; }
+    select, input[type="text"], input[type="email"], textarea { font-size:16px; } /* evita zoom iOS */
+    .terms-wrapper { flex-direction:column; align-items:flex-start; gap:8px; }
+    .btn { width:auto; padding:10px 16px; }
+    .btn-back { margin-right:8px; margin-bottom:0; }
+    #pantalla-10 { padding:18px 14px 14px 14px !important; }
+    #pantalla-10 p { font-size:1rem !important; line-height:1.55 !important; }
+    #pantalla-10 .perfil-titulo { font-size:1.3rem !important; }
+  }
+  @media(max-width:480px){
+    #logo-provi { position: static !important; text-align:center; margin:10px auto 0; }
+    #logo-provi img { height:44px !important; margin:0 auto; }
+    .typing { min-height:auto; }
+  }
+  #logo-provi { position:absolute; top:12px; right:12px; z-index:10; }
+  @media (pointer:coarse) and (max-width:1024px){ #logo-provi { right:8px; top:8px; } }
+
+  @media print {
+    body {background: var(--provi-bg) !important;color: #fff !important;margin: 0;}
+    #pantalla-10 {background: var(--provi-bg) !important;color: #fff !important;border: none;box-shadow: none;padding: 40px;}
+    #pantalla-10 p, #pantalla-10 .perfil-titulo {color: #fff !important;}
+    #printBtnContainer,
+    #logo-provi,
+    #pantalla-1,#pantalla-2,#pantalla-3,#pantalla-4,#pantalla-5,#pantalla-6,#pantalla-7,#pantalla-8 {display:none !important;}
+  }
+</style>
+</head>
+<body>
+  <div id="logo-provi" style="position:absolute;top:20px;right:24px;z-index:2">
+    <img src="img/logoproviblanco.png" alt="Logo Provi" style="height:60px" />
+  </div>
+  <h1>Perfil de inversionista</h1>
+
+  <!-- ########## PANTALLA 1 – Intro + Consentimiento ########## -->
+  <section class="card" id="pantalla-1">
+    <div class="terms-wrapper">
+      <input type="checkbox" id="chkTerms" />
+      <label for="chkTerms" style="margin:0;font-weight:normal">
+        Acepto los
+        <a href="https://realprovi.com/politica/" target="_blank" rel="noopener noreferrer">términos y condiciones</a>
+        y autorizo el tratamiento de datos.
+      </label>
+    </div>
+    <p id="introText" class="typing"></p>
+    <div id="introReady" style="display:none; text-align:center; margin-top:24px;">
+      <p style="font-weight:bold">Si estás listo, haz clic en <em>Siguiente</em></p>
+      <button class="btn" id="btnNext1" disabled>Siguiente</button>
+    </div>
+  </section>
+
+  <!-- ########## PANTALLA 2 – Contacto ########## -->
+  <section class="card hidden" id="pantalla-2">
+    <label for="nombre">Nombre completo*</label>
+    <input type="text" id="nombre" required />
+
+    <label for="email">Correo electrónico*</label>
+    <input type="email" id="email" required />
+
+    <label for="telefono">Teléfono*</label>
+    <input type="text" id="telefono" required />
+
+    <!-- NUEVO: Género -->
+    <label for="genero">Género*</label>
+    <select id="genero" required>
+      <option hidden value="">Selecciona…</option>
+      <option>Femenino</option>
+      <option>Masculino</option>
+      <option>Prefiero no decirlo</option>
+    </select>
+
+    <div class="actions">
+      <button class="btn btn-back"  id="btnBack2">Atrás</button>
+      <button class="btn"          id="btnNext2">Siguiente</button>
+    </div>
+  </section>
+
+  <!-- ########## PANTALLA 3 – Información demográfica (sin ingresos aquí) ########## -->
+  <section class="card hidden" id="pantalla-3">
+    <label for="residencia">Lugar de residencia*</label>
+    <select id="residencia">
+      <option hidden value="">Selecciona…</option>
+      <option>Bogotá, Colombia</option>
+      <option>Medellín, Colombia</option>
+      <option>Cali, Colombia</option>
+      <option>México</option>
+      <option>Panamá</option>
+      <option>Estados Unidos</option>
+      <option>Otro</option>
+    </select>
+    <input type="text" id="residencia_otro" style="display:none;margin-top:10px" placeholder="Especifica tu lugar de residencia" />
+
+    <label for="edad">¿Cuál es tu edad?*</label>
+    <select id="edad">
+      <option hidden value="">Selecciona…</option>
+      <option>Menos de 30 años</option>
+      <option>31-40 años</option>
+      <option>41-50 años</option>
+      <option>51-60 años</option>
+      <option>Más de 61 años</option>
+    </select>
+
+    <label for="ocupacion">¿A qué te dedicas?*</label>
+    <select id="ocupacion">
+      <option hidden value="">Selecciona…</option>
+      <option>Sector financiero</option>
+      <option>Sector inmobiliario</option>
+      <option>Tecnología</option>
+      <option>Salud</option>
+      <option>Comercio / ventas</option>
+      <option>Gobierno / sector público</option>
+      <option>Otro</option>
+    </select>
+    <input type="text" id="ocupacion_otro" style="display:none;margin-top:10px" placeholder="Especifica tu ocupación" />
+
+    <label for="convivencia">¿Con quién vives actualmente?*</label>
+    <select id="convivencia">
+      <option hidden value="">Selecciona…</option>
+      <option>Vivo solo/a</option>
+      <option>Vivo con mi pareja</option>
+      <option>Vivo con mi pareja y mis hijos</option>
+      <option>Otro</option>
+    </select>
+    <input type="text" id="convivencia_otro" style="display:none;margin-top:10px" placeholder="Especifica con quién vives" />
+
+    <div class="actions">
+      <button class="btn btn-back" id="btnBack3">Atrás</button>
+      <button class="btn"         id="btnNext3">Siguiente</button>
+    </div>
+  </section>
+
+  <!-- ########## PANTALLA 4 – Experiencia (condicional) ########## -->
+  <section class="card hidden" id="pantalla-4">
+    <label for="inv_prev">¿Has invertido anteriormente en bienes raíces?*</label>
+    <select id="inv_prev">
+      <option hidden value="">Selecciona…</option>
+      <option>Sí</option>
+      <option>No</option>
+    </select>
+
+    <div id="expAdicional" style="display:none;">
+      <label for="tipo_inv_realizadas">¿Qué tipo de inversiones inmobiliarias has realizado?*</label>
+      <select id="tipo_inv_realizadas">
+        <option hidden value="">Selecciona…</option>
+        <option>Compra de propiedades para alquilar en renta tradicional</option>
+        <option>Compra de propiedades para alquilar en renta corta</option>
+        <option>Inversión en proyectos en pre venta</option>
+        <option>Otro</option>
+      </select>
+      <input type="text" id="tipo_inv_realizadas_otro" style="display:none;margin-top:10px" placeholder="Especifica el tipo de inversión" />
+
+      <label for="num_prop">¿Cuántas propiedades has adquirido o vendido hasta el momento?*</label>
+      <select id="num_prop">
+        <option hidden value="">Selecciona…</option>
+        <option>1 propiedad</option>
+        <option>2 a 5 propiedades</option>
+        <option>Más de 5 propiedades</option>
+      </select>
+
+      <label for="mercados_inv">¿En qué mercados has invertido anteriormente?*</label>
+      <select id="mercados_inv">
+        <option hidden value="">Selecciona…</option>
+        <option>En mi país</option>
+        <option>En mercados internacionales</option>
+        <option>Otro</option>
+      </select>
+      <input type="text" id="mercados_inv_otro" style="display:none;margin-top:10px" placeholder="Especifica el mercado" />
+
+      <label for="gestion_prop">¿Tienes experiencia en gestionar propiedades (alquiler, mantenimiento, etc.)?*</label>
+      <select id="gestion_prop">
+        <option hidden value="">Selecciona…</option>
+        <option>No tengo experiencia, utilizo un administrador</option>
+        <option>Tengo experiencia, lo hago yo mismo</option>
+        <option>Otro</option>
+      </select>
+      <input type="text" id="gestion_prop_otro" style="display:none;margin-top:10px" placeholder="Especifica tu experiencia" />
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-back" id="btnBack4">Atrás</button>
+      <button class="btn"         id="btnNext4">Siguiente</button>
+    </div>
+  </section>
+
+  <!-- ########## PANTALLA 5 – Perfil de interés ########## -->
+  <section class="card hidden" id="pantalla-5">
+    <label for="motivacion">¿Cuál es tu principal motivación para invertir en finca raíz?*</label>
+    <select id="motivacion">
+      <option hidden value="">Selecciona…</option>
+      <option>Quiero ganar valorización, no tengo problema con esperar</option>
+      <option>Quiero generar rentabilidad inmediata</option>
+      <option>Otro</option>
+    </select>
+    <input type="text" id="motivacion_otro" style="display:none;margin-top:10px" placeholder="Especifica tu motivación" />
+
+    <label for="liquidez">¿Cuánto tiempo estarías dispuesto a esperar para obtener liquidez de tu inversión?*</label>
+    <select id="liquidez">
+      <option hidden value="">Selecciona…</option>
+      <option>Inmediato (menos de 6 meses): Busco generar ingresos ya, aún esperar la valorización</option>
+      <option>Puedo esperar a recibir ingresos una vez finalice la etapa de construcción.</option>
+      <option>Largo plazo (más de 2 años): No me importa no recibir ingresos mientras pago abono o al crédito o el proyecto crece</option>
+    </select>
+
+    <!-- INGRESOS: aquí únicamente, con rangos nuevos -->
+    <label for="ingresos5">¿Cuáles son los ingresos mensuales combinados de las personas que aportarían a la inversión? (En USD)*</label>
+    <select id="ingresos5">
+      <option hidden value="">Selecciona…</option>
+      <option>Menos de $4,000 USD</option>
+      <option>$4,001 – $8,000 USD</option>
+      <option>$8,001 – $12,000 USD</option>
+      <option>$12,001 – $20,000 USD</option>
+      <option>$20,001 – $30,000 USD</option>
+      <option>Más de $30,001 USD</option>
+      <option>Prefiero no contestar</option>
+    </select>
+
+    <label for="capital">¿Cuánto capital tienes disponible para invertir actualmente? (sin tener en cuenta el apalancamiento)*</label>
+    <select id="capital">
+      <option hidden value="">Selecciona…</option>
+      <option>Entre $0 a $10,000 USD</option>
+      <option>Entre $10,000 y $30,000 USD</option>
+      <option>Entre $30,000 y $50,000 USD</option>
+      <option>Entre $50,000 y $70,000 USD</option>
+      <option>Más de $70,000 USD</option>
+    </select>
+
+    <label for="cuotas">¿Cuánto dinero tienes actualmente disponible para el pago de las cuotas mensuales de tu inversión?*</label>
+    <select id="cuotas">
+      <option hidden value="">Selecciona…</option>
+      <option>Menos de $1,500 USD al mes</option>
+      <option>Entre $1,500 y $2,500 USD al mes</option>
+      <option>Más de $2,500 USD al mes</option>
+    </select>
+
+    <div class="actions">
+      <button class="btn btn-back" id="btnBack5">Atrás</button>
+      <button class="btn"         id="btnNext5">Siguiente</button>
+    </div>
+  </section>
+
+  <!-- ########## PANTALLA 6 – Riesgo & Objetivos ########## -->
+  <section class="card hidden" id="pantalla-6">
+    <div class="question-block">
+      <label for="seguridad">¿Qué tan importante es para ti la seguridad de tu inversión sobre la rentabilidad?*</label>
+      <select id="seguridad">
+        <option hidden value="">Selecciona…</option>
+        <option>Priorizo seguridad sobre rentabilidad</option>
+        <option>Busco un balance entre seguridad y rentabilidad</option>
+        <option>Priorizo rentabilidad sobre seguridad</option>
+      </select>
+    </div>
+
+    <!-- OBJETIVOS reescritos -->
+    <fieldset id="objetivosGroup" class="fieldset-clean">
+      <legend>¿Cuál es tu principal objetivo al invertir tu dinero? (Selecciona todas las opciones que apliquen)</legend>
+
+      <label><input type="checkbox" name="objetivos" value="Generar ingresos pasivos que complementen mis ingresos actuales."> Generar ingresos pasivos que complementen mis ingresos actuales.</label>
+
+      <label><input type="checkbox" name="objetivos" value="Hacer crecer mi patrimonio a mediano o largo plazo."> Hacer crecer mi patrimonio a mediano o largo plazo.</label>
+
+      <label><input type="checkbox" name="objetivos" value="Diversificar mi portafolio en diferentes monedas o países."> Diversificar mi portafolio en diferentes monedas o países.</label>
+
+      <label><input type="checkbox" name="objetivos" value="Proteger mi dinero frente a la inflación o la devaluación."> Proteger mi dinero frente a la inflación o la devaluación.</label>
+
+      <label><input type="checkbox" name="objetivos" value="Preparar mi retiro o una meta futura específica (por ejemplo, educación, jubilación, segunda vivienda)."> Preparar mi retiro o una meta futura específica (por ejemplo, educación, jubilación, segunda vivienda).</label>
+
+      <label><input type="checkbox" name="objetivos" value="Optimizar mi carga tributaria o aprovechar beneficios fiscales."> Optimizar mi carga tributaria o aprovechar beneficios fiscales.</label>
+    </fieldset>
+
+    <label for="beneficio_tributario">¿Tu interés en invertir en el exterior está relacionado con aprovechar beneficios tributarios?*</label>
+    <select id="beneficio_tributario">
+      <option hidden value="">Selecciona…</option>
+      <option>Sí, es mi principal motivación.</option>
+      <option>Me interesa como un beneficio adicional.</option>
+      <option>No, no es un factor relevante para mí.</option>
+    </select>
+
+    <label for="ubicacion" class="question-block">¿En qué ubicación geográfica prefieres invertir en bienes raíces?*</label>
+    <select id="ubicacion">
+      <option hidden value="">Selecciona…</option>
+      <option>Colombia</option>
+      <option>Estados Unidos</option>
+      <option>Panamá</option>
+      <option>República Dominicana</option>
+      <option>Otro</option>
+      <option>Me es indiferente, priorizo rentabilidad.</option>
+    </select>
+    <input type="text" id="ubicacion_otro" style="display:none;margin-top:10px" placeholder="Especifica la ubicación" />
+
+    <div class="actions">
+      <button class="btn btn-back" id="btnBack6">Atrás</button>
+      <button class="btn"         id="btnNext6">Siguiente</button>
+    </div>
+  </section>
+
+  <!-- ########## PANTALLA 7 – Comentarios ########## -->
+  <section class="card hidden" id="pantalla-7">
+    <label for="comentarios">Comentarios (opcional)</label>
+    <textarea id="comentarios" placeholder="Déjanos cualquier otra información que consideres relevante sobre tus preferencias o perfil."></textarea>
+
+    <div class="actions">
+      <button class="btn btn-back" id="btnBack7">Atrás</button>
+      <button class="btn"         id="btnEnviar">Generar perfil</button>
+    </div>
+
+    <div id="loadingMsg" style="display:none;text-align:center;margin-top:18px;font-size:1.2em;color:#105028"></div>
+  </section>
+
+  <!-- ########## PANTALLA 10 – Resultado ########## -->
+  <section class="card hidden" id="pantalla-10">
+    <div class="perfil-titulo">Perfil de inversionista</div>
+    <div id="out"></div>
+  </section>
+  <div id="printBtnContainer" style="text-align:right; margin-top:28px; display:none;">
+    <button id="btnPrintPerfil" class="btn" style="background:#fff; color:#105028; font-weight:bold; border:2px solid #105028; font-size:1em; padding:10px 32px; border-radius:28px; cursor:pointer;">
+      Imprimir o guardar PDF
+    </button>
+  </div>
+
+<script>
+window.addEventListener('DOMContentLoaded', function () {
+  /* Intro breve */
+  const introTxt =
+`Querido inversionista,
+¡Bienvenido a la primera parte del proceso! A continuación, te invitamos a diligenciar el siguiente formulario, el cual nos permitirá conocer tu perfil de inversionista, entender cuáles son tus intereses de inversión, tu perfil financiero, tu perfil de riesgo y, así, presentarte proyectos que realmente se ajusten a tus objetivos y necesidades.`;
+  let idx = 0, introTerminado = false;
+  const introEl = document.getElementById('introText');
+  const chkTerms = document.getElementById('chkTerms');
+  const btnNext1 = document.getElementById('btnNext1');
+
+  function verificarListo(){ btnNext1.disabled = !(introTerminado && chkTerms.checked); }
+  function typeIntro(){
+    if(!introEl) return;
+    if(idx < introTxt.length){ introEl.textContent += introTxt.charAt(idx++); setTimeout(typeIntro, 3); }
+    else { introTerminado = true; document.getElementById('introReady').style.display='block'; verificarListo(); }
+  }
+  chkTerms.onchange = verificarListo; if(introEl) typeIntro();
+
+  /* Mostrar input libre cuando eligen "Otro" */
+  function manejarCamposOtro() {
+    const campos = [
+      {select: 'residencia', input: 'residencia_otro', valor: 'Otro'},
+      {select: 'ocupacion', input: 'ocupacion_otro', valor: 'Otro'},
+      {select: 'convivencia', input: 'convivencia_otro', valor: 'Otro'},
+      {select: 'tipo_inv_realizadas', input: 'tipo_inv_realizadas_otro', valor: 'Otro'},
+      {select: 'ubicacion', input: 'ubicacion_otro', valor: 'Otro'},
+
+      /* nuevos “Otro” */
+      {select: 'motivacion', input: 'motivacion_otro', valor: 'Otro'},
+      {select: 'mercados_inv', input: 'mercados_inv_otro', valor: 'Otro'},
+      {select: 'gestion_prop', input: 'gestion_prop_otro', valor: 'Otro'}
+    ];
+    campos.forEach(({select,input,valor})=>{
+      const sel = document.getElementById(select);
+      const inp = document.getElementById(input);
+      if(sel && inp){
+        sel.addEventListener('change', ()=>{
+          if(sel.value === valor){ inp.style.display=''; }
+          else { inp.style.display='none'; inp.value=''; }
+        });
+      }
+    });
+  }
+  manejarCamposOtro();
+
+  /* Navegación simple con scroll top */
+  function show(id){
+    document.querySelectorAll('.card').forEach(s=>s.classList.add('hidden'));
+    const section = document.getElementById(id);
+    section.classList.remove('hidden');
+    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+      document.activeElement.blur();
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.getElementById('btnNext1').onclick = ()=> show('pantalla-2');
+
+  // P2
+  btnBack2.onclick = ()=> show('pantalla-1');
+  btnNext2.onclick = ()=>{
+    if(!nombre.value || !email.value || !telefono.value || !genero.value){
+      alert('Por favor completa todos los campos obligatorios.');
+      return;
+    }
+    show('pantalla-3');
+  };
+
+  // P3 (sin ingresos)
+  btnBack3.onclick = ()=> show('pantalla-2');
+  btnNext3.onclick = ()=>{
+    const residenciaVal = (residencia.value==='Otro' && residencia_otro.value) ? residencia_otro.value : residencia.value;
+    const ocupacionVal  = (ocupacion.value==='Otro' && ocupacion_otro.value) ? ocupacion_otro.value : ocupacion.value;
+    const convVal       = (convivencia.value==='Otro' && convivencia_otro.value) ? convivencia_otro.value : convivencia.value;
+    if(!residenciaVal || !edad.value || !ocupacionVal || !convVal ){
+      alert('Por favor responde todas las preguntas antes de continuar.');
+      return;
+    }
+    show('pantalla-4');
+  };
+
+  // P4 (condicional experiencia)
+  const expAdicional = document.getElementById('expAdicional');
+  inv_prev.onchange = ()=> { expAdicional.style.display = (inv_prev.value==='Sí') ? '' : 'none'; };
+  btnBack4.onclick = ()=> show('pantalla-3');
+  btnNext4.onclick = ()=>{
+    if(!inv_prev.value){ alert('Por favor indica si has invertido antes.'); return; }
+    if(inv_prev.value==='No'){ show('pantalla-5'); return; }
+    const tipoVal = (tipo_inv_realizadas.value==='Otro' && tipo_inv_realizadas_otro.value) ? tipo_inv_realizadas_otro.value : tipo_inv_realizadas.value;
+    const mktVal  = (mercados_inv && mercados_inv.value==='Otro' && mercados_inv_otro.value) ? mercados_inv_otro.value : (mercados_inv ? mercados_inv.value : "");
+    const gestVal = (gestion_prop && gestion_prop.value==='Otro' && gestion_prop_otro.value) ? gestion_prop_otro.value : (gestion_prop ? gestion_prop.value : "");
+    if(!tipoVal || !num_prop.value || !mktVal || !gestVal){ alert('Completa tu experiencia.'); return; }
+    show('pantalla-5');
+  };
+
+  // P5 (con ingresos aquí y obligatorios)
+  btnBack5.onclick = ()=> show('pantalla-4');
+  btnNext5.onclick = ()=>{
+    const motivVal = (motivacion.value==='Otro' && motivacion_otro.value) ? motivacion_otro.value : motivacion.value;
+    if(!motivVal || !liquidez.value || !ingresos5.value || !capital.value || !cuotas.value){
+      alert('Por favor responde todas las preguntas.');
+      return;
+    }
+    show('pantalla-6');
+  };
+
+  // P6
+  btnBack6.onclick = ()=> show('pantalla-5');
+  btnNext6.onclick = ()=>{
+    if(!seguridad.value || !beneficio_tributario.value || !ubicacion.value){ alert('Responde seguridad, beneficios y ubicación.'); return; }
+    show('pantalla-7');
+  };
+
+  // P7
+  btnBack7.onclick = ()=> show('pantalla-6');
+
+  /* Envío */
+  btnEnviar.onclick = async ()=>{
+    const respuestas = {
+      // contacto
+      nombre: nombre.value, email: email.value, telefono: telefono.value, genero: genero.value,
+      // demografía
+      residencia: (residencia.value==='Otro' && residencia_otro.value) ? residencia_otro.value : residencia.value,
+      edad: edad.value,
+      ocupacion: (ocupacion.value==='Otro' && ocupacion_otro.value) ? ocupacion_otro.value : ocupacion.value,
+      convivencia: (convivencia.value==='Otro' && convivencia_otro.value) ? convivencia_otro.value : convivencia.value,
+      // ingresos ahora desde P5
+      ingresos: (document.getElementById("ingresos5") ? document.getElementById("ingresos5").value : ""),
+      // experiencia
+      inv_prev: inv_prev.value,
+      tipo_inv_realizadas: (tipo_inv_realizadas.value==='Otro' && tipo_inv_realizadas_otro.value) ? tipo_inv_realizadas_otro.value : tipo_inv_realizadas.value,
+      num_prop: num_prop ? num_prop.value : "",
+      mercados_inv: (mercados_inv && mercados_inv.value==='Otro' && mercados_inv_otro.value) ? mercados_inv_otro.value : (mercados_inv ? mercados_inv.value : ""),
+      gestion_prop: (gestion_prop && gestion_prop.value==='Otro' && gestion_prop_otro.value) ? gestion_prop_otro.value : (gestion_prop ? gestion_prop.value : ""),
+      // interés
+      motivacion: (motivacion.value==='Otro' && motivacion_otro.value) ? motivacion_otro.value : motivacion.value,
+      liquidez: liquidez.value,
+      capital: capital.value,
+      cuotas: cuotas.value,
+      // riesgo & objetivos
+      seguridad: seguridad.value,
+      objetivos: Array.from(document.querySelectorAll('input[name="objetivos"]:checked')).map(c=>c.value).join(', '),
+      beneficio_tributario: beneficio_tributario.value,
+      ubicacion: (ubicacion.value==='Otro' && ubicacion_otro.value) ? ubicacion_otro.value : ubicacion.value,
+      // comentarios
+      comentarios: comentarios.value
+    };
+
+    const loading = document.getElementById('loadingMsg');
+    loading.style.display='block'; loading.textContent='Generando tu perfil, por favor espera…';
+
+    try{
+      btnEnviar.disabled = true;
+      const r = await fetch('https://provi-backend.onrender.com/api/perfiles', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(respuestas)
+      });
+
+      let perfil=''; 
+      if(r.ok){
+        try{ const data = await r.json(); perfil = data.perfil || ''; }catch{}
+      }
+
+      const cierreHTML = [
+        '<p>Felicitaciones por dar el primer paso hacia una inversión con criterio, propósito y una rentabilidad sólida. Has iniciado un camino que no solo te conecta con excelentes oportunidades, sino también con tus objetivos personales como inversionista.</p>',
+        '<p>El siguiente paso es presentarte las opciones que mejor cumplen tus objetivos de inversión. Muy pronto nos estaremos comunicando contigo.</p>'
+      ].join('');
+
+      if(!r.ok || !perfil){
+        out.innerHTML = '<p>⚠ No se pudo generar el perfil en este momento.</p>' + cierreHTML;
+      } else {
+        out.innerHTML = perfil.split(/\n\s*\n/).map(p=>`<p>${p.trim()}</p>`).join('');
+        out.insertAdjacentHTML('beforeend', cierreHTML);
+      }
+
+      show('pantalla-10'); loading.style.display='none';
+      document.getElementById('printBtnContainer').style.display='block';
+    }catch(err){
+      out.innerHTML = `<p>⚠ ${err.message.includes('fetch')?'No se pudo conectar al servidor. Verifica tu conexión o la URL del backend.':err.message}</p>`;
+      show('pantalla-10'); loading.style.display='none';
+      document.getElementById('printBtnContainer').style.display='block';
+    }finally{ btnEnviar.disabled=false; }
+  };
+
+  document.getElementById('btnPrintPerfil').onclick = ()=> window.print();
+});
+</script>
+</body>
+</html>
